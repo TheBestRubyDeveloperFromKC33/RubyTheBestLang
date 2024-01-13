@@ -1,0 +1,50 @@
+# Зробити невеликий скрипт
+# На вхід передаємо математичний вираз у звичному нам вигляді
+# На виході бачимо його у RPN
+#
+# EX:
+# input --> 2 + 1 × 4
+# output --> 2 1 4 * +
+
+# Приорітет операцій
+OPERATOR_PRIORITY = {'+' => 1, '-' => 1, '*' => 2, '/' => 2}
+
+# Функція для конвертації виразу в RPN
+def convert_to_rpn(expression)
+  output_queue = []
+  operator_stack = []
+
+  expression.each do |token|
+    case token
+    when /\d+/
+      output_queue.push(token)
+    when '('
+      operator_stack.push(token)
+    when ')'
+      output_queue.push(operator_stack.pop) while operator_stack.last != '('
+      operator_stack.pop
+    else
+      resolve_operators(operator_stack, output_queue, token)
+    end
+  end
+
+  output_queue.concat(operator_stack.reverse)
+  output_queue.join(' ')
+end
+
+# Обробка операторів
+def resolve_operators(stack, queue, current_operator)
+  while !stack.empty? && stack.last != '(' && OPERATOR_PRIORITY[stack.last] >= OPERATOR_PRIORITY[current_operator]
+    queue.push(stack.pop)
+  end
+  stack.push(current_operator)
+end
+
+# Основна частина скрипта
+if ARGV.length != 1
+  puts "Input should be a single string with spaces between numbers and operators"
+  exit
+end
+
+input_expression = ARGV[0].split
+puts convert_to_rpn(input_expression)
